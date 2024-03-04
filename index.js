@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dns = require('dns');
@@ -118,5 +119,5 @@ const mongoose = require('mongoose');
 })();
 
 function isValidUrl(url) {
-	return /^(ftp|http|https):\/\/[^ "]+$/.test(url);
+	return /^(https?:\/\/)www\..*$/.test(url);
 }
