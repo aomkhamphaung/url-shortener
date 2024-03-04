@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dns = require('dns');
+const { url } = require('inspector');
 const app = express();
 
 // Basic Configuration
@@ -39,58 +40,42 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-// app.post('/api/shorturl', async(req, res) => {
-//   const input_url = req.body.url;
-//     try {
-//       let url = await Url.findOne({original_url: input_url});
-//       if(!url) {
-//         const shortUrl = await Url.countDocuments() + 1;
-//         url = new Url({original_url: input_url, short_url: shortUrl});
-//         await url.save();
-//       }
-//       res.status(200).json({original_url: url.original_url, short_url: url.short_url});
-//     }catch(err) {
-//       console.log(err);
-//       res.status(500).json({
-// 				error: err.message || 'Cannot get Users',
-// 			});
-//     } 
-// })
-
 app.post('/api/shorturl', async(req, res) => {
   const input_url = req.body.url;
   dns.lookup(input_url.hostname, (err) => {
-    if(err && err.code === 'ENOTFOUND') {
+    if(err) {
       console.log(err);
       res.status(500).json({error: "Invalid URL"});
     } else {
-      Url.findOne({original_url: input_url}, (err, data) => {
+       let url = Url.findOne({original_url: input_url})
+       console.log(url);
         if(err) {
           console.log(err);
         }
+
+        if(url) {
+          return res.status(200).json({original_url: url.original_url, short_url: url.short_url})
+        }
+
         const shortUrl = Url.countDocuments() + 1;
-        const urlData = new Url({
-          original_url: input_url,
+        const urlData = Url.create({
+          original_url: url.original_url,
           short_url: shortUrl
         })
-      })
-
-      urlData.save((err) => {
-        res.status(500).json("Error saving to database");
-      })
-      return res.status(200).json({original_url: urlData.original_url, short_url: urlData.short_url});
-    }
+        return res.status(200).json({original_url: urlData.original_url, short_url: urlData.short_url});
+      }
+    })
   })
-})
+
 
 app.post('/api/shorturl/:shorturl', (req, res) => {
-  Url.findOne({short_url: req.params.shorturl}, (err, data) => {
+  const data = Url.findOne({short_url: req.params.shorturl})
     if(err) {
       console.log(err);
     }
     res.redirect(data.original_url);
-  })
-})
+  }
+)
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
