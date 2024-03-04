@@ -4,6 +4,7 @@
 	"description": "API project for freeCodeCamp",
 	"main": "index.js",
 	"scripts": {
+		"format": "prettier -w .",
 		"dev": "node --watch --no-warnings ./index.js",
 		"start": "node index.js"
 	},

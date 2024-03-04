@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { url } = require('inspector');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dns = require('dns');
@@ -45,8 +44,13 @@ const mongoose = require('mongoose');
 				});
 			}
 
+			if (!isValidUrl(input_url)) {
+				return res.status(400).json({
+					error: 'invalid url',
+				});
+			}
+
 			const hostname = new URL(input_url).hostname;
-      console.log(hostname);
 
 			dns.lookup(hostname, async (error, address) => {
 				if (error) {
@@ -55,8 +59,8 @@ const mongoose = require('mongoose');
 					});
 				}
 
-        const validUrl = new URL(input_url);
-        console.log(validUrl);
+				const validUrl = new URL(input_url);
+				console.log(validUrl);
 
 				let url = await UrlModel.findOne({ original_url: input_url });
 
@@ -83,7 +87,7 @@ const mongoose = require('mongoose');
 			console.error(error);
 
 			res.status(400).json({
-				error: "invalid url",
+				error: error.message,
 			});
 		}
 	});
@@ -112,3 +116,7 @@ const mongoose = require('mongoose');
 		console.log(`Listening on port ${PORT}`);
 	});
 })();
+
+function isValidUrl(url) {
+	return /^(ftp|http|https):\/\/[^ "]+$/.test(url);
+}
