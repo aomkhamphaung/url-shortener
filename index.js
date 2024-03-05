@@ -40,13 +40,13 @@ const mongoose = require('mongoose');
 			const input_url = req.body.url;
 
 			if (!input_url) {
-				return res.status(400).json({
+				res.status(400).json({
 					error: 'url must be provided',
 				});
 			}
 
 			if (!isValidUrl(input_url)) {
-				return res.status(400).json({
+				res.json({
 					error: 'invalid url',
 				});
 			}
@@ -55,13 +55,10 @@ const mongoose = require('mongoose');
 
 			dns.lookup(hostname, async (error, address) => {
 				if (error) {
-					return res.status(400).json({
+					res.json({
 						error: 'invalid url',
 					});
 				}
-
-				const validUrl = new URL(input_url);
-				console.log(validUrl);
 
 				let url = await UrlModel.findOne({ original_url: input_url });
 
